@@ -1,0 +1,4 @@
+#No .DS_Store, pickle files, ipynb checkpoints
+.DS_Store
+*.p
+.ipynb_checkpoints/
