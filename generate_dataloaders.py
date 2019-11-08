@@ -109,8 +109,8 @@ def pad_list_of_tensors(list_of_tensors, pad_token):
 def pad_collate_fn(batch):
     # batch is a list of sample tuples
     token_list = [s[0] for s in batch]
-    idx_list = torch.FloatTensor([s[1] for s in batch])
-    problematic = torch.FloatTensor([s[2] for s in batch])
+    idx_list = torch.LongTensor([s[1] for s in batch])
+    problematic = torch.LongTensor([s[2] for s in batch])
     
     #pad_token = persona_dict.get_id('<pad>')
     pad_token = 2
