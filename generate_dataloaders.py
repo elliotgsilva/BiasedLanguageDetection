@@ -3,7 +3,8 @@
 
 # ### Make a dictionary, dataloader
 
-# In[1]:
+#Classes: Dictionary, TensoredDataset
+#Fcns: indexize_dataset, pad_list_of_tensors, pad_collate_fn
 
 
 import sys
@@ -16,21 +17,6 @@ from torch.utils.data import DataLoader, random_split, Dataset, RandomSampler, S
 import pickle
 
 
-# In[2]:
-
-
-# Import prepocessed Dataset(already tokenized)
-with open("./data/master_df.p", 'rb') as handle:
-    datasets = pickle.load(handle)
-
-
-# In[3]:
-
-
-datasets=datasets[datasets['review'].apply(lambda x: len(x)<=30)]
-
-
-# In[4]:
 
 
 class Dictionary(object):
@@ -75,27 +61,6 @@ class Dictionary(object):
         return len(self.tokens)
 
 
-# In[5]:
-
-
-# Make a dictionary
-review_dict = Dictionary(datasets, include_valid=False)
-
-
-# In[6]:
-
-
-review_dict.get_id("thank")
-
-
-# In[7]:
-
-
-review_dict.encode_token_seq(datasets.iloc[0,0])
-
-
-# In[8]:
-
 
 def indexize_dataset(datasets, dictionary):
     indexized_datasets = []
@@ -105,14 +70,6 @@ def indexize_dataset(datasets, dictionary):
         
     return indexized_datasets
 
-
-# In[9]:
-
-
-indexized_datasets = indexize_dataset(datasets, review_dict)
-
-
-# In[10]:
 
 
 class TensoredDataset(object):
@@ -135,21 +92,6 @@ class TensoredDataset(object):
         # return a (input, target) tuple
         return (self.input_tensors[idx], self.flagged_index[idx], self.problematic[idx])
 
-
-# In[11]:
-
-
-tensor_dataset = TensoredDataset(indexized_datasets,datasets["flagged_index"].to_list(),datasets["problematic"].to_list())
-
-
-# In[12]:
-
-
-# check the first example
-tensor_dataset[0]
-
-
-# In[22]:
 
 
 def pad_list_of_tensors(list_of_tensors, pad_token):
@@ -176,50 +118,4 @@ def pad_collate_fn(batch):
     input_tensor = pad_list_of_tensors(token_list, pad_token)
     
     return input_tensor, idx_list, problematic
-
-
-# In[23]:
-
-
-# Divide into train(95%), valid(5%) dataset
-batch_size = 32
-n_train_samples = int(0.95 * len(datasets))
-n_val_samples = len(datasets) - n_train_samples
-
-train_dataset, val_dataset = random_split(tensor_dataset, [n_train_samples, n_val_samples])
-
-train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=pad_collate_fn)
-val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, collate_fn=pad_collate_fn)
-
-
-# In[28]:
-
-
-for i, x in enumerate(train_dataloader):
-    print(x[0].shape)
-    print(x[1].shape)
-    print(x[2].shape)
-    print(x[2])
-    break
-
-
-# In[15]:
-
-
-path = os.getcwd()
-data_dir = path + '/data/'
-
-pickle_train_dataloader = open(data_dir + "train_dataloader.p","wb")
-pickle.dump(train_dataloader, pickle_train_dataloader)
-pickle_train_dataloader.close()
-
-pickle_val_dataloader = open(data_dir + "val_dataloader.p","wb")
-pickle.dump(val_dataloader, pickle_val_dataloader)
-pickle_val_dataloader.close()
-
-
-# In[ ]:
-
-
-
 
