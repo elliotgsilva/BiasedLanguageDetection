@@ -26,8 +26,6 @@ class Dictionary(object):
         self.counts = {}
         
         # add special tokens
-        self.add_token('<bos>')
-        self.add_token('<eos>')
         self.add_token('<pad>')
         self.add_token('<unk>')
         
@@ -73,24 +71,27 @@ def indexize_dataset(datasets, dictionary):
 
 
 class TensoredDataset(object):
-    def __init__(self, list_of_lists_of_tokens, list_of_flagged_indexes, list_of_problematic_flags):
+    def __init__(self, list_of_lists_of_tokens, list_of_labels,list_of_flagged_indexes):
         self.input_tensors = []
+        self.label_tensors = []
         self.flagged_index = []
         self.problematic = []
         
         for sample in list_of_lists_of_tokens:
             self.input_tensors.append(torch.tensor([sample[:-1]], dtype=torch.long))
+        for sample in list_of_labels:
+            self.label_tensors.append(torch.tensor(sample, dtype=torch.long))
         for sample in list_of_flagged_indexes:
             self.flagged_index.append(torch.tensor(sample, dtype=torch.long))
-        for sample in list_of_problematic_flags:
-            self.problematic.append(torch.tensor(sample, dtype=torch.long))
+        #for sample in list_of_problematic_flags:
+            #self.problematic.append(torch.tensor(sample, dtype=torch.long))
         
     def __len__(self):
         return len(self.input_tensors)
     
     def __getitem__(self, idx):
         # return a (input, target) tuple
-        return (self.input_tensors[idx], self.flagged_index[idx], self.problematic[idx])
+        return (self.input_tensors[idx], self.label_tensors[idx], self.flagged_index[idx])
 
 
 
@@ -109,13 +110,14 @@ def pad_list_of_tensors(list_of_tensors, pad_token):
 def pad_collate_fn(batch):
     # batch is a list of sample tuples
     token_list = [s[0] for s in batch]
-    idx_list = torch.LongTensor([s[1] for s in batch])
-    problematic = torch.LongTensor([s[2] for s in batch])
+    label_list = torch.LongTensor([s[1] for s in batch])
+    idx_list = torch.LongTensor([s[2] for s in batch])
+    problematic = torch.LongTensor([s[3] for s in batch])
     
     #pad_token = persona_dict.get_id('<pad>')
-    pad_token = 2
+    pad_token = 0
     
     input_tensor = pad_list_of_tensors(token_list, pad_token)
     
-    return input_tensor, idx_list, problematic
+    return input_tensor, label_list, idx_list#, problematic
 
