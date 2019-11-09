@@ -83,8 +83,6 @@ class TensoredDataset(object):
             self.label_tensors.append(torch.tensor(sample, dtype=torch.long))
         for sample in list_of_flagged_indexes:
             self.flagged_index.append(torch.tensor(sample, dtype=torch.long))
-        #for sample in list_of_problematic_flags:
-            #self.problematic.append(torch.tensor(sample, dtype=torch.long))
         
     def __len__(self):
         return len(self.input_tensors)
@@ -112,12 +110,11 @@ def pad_collate_fn(batch):
     token_list = [s[0] for s in batch]
     label_list = torch.LongTensor([s[1] for s in batch])
     idx_list = torch.LongTensor([s[2] for s in batch])
-    problematic = torch.LongTensor([s[3] for s in batch])
     
     #pad_token = persona_dict.get_id('<pad>')
     pad_token = 0
     
     input_tensor = pad_list_of_tensors(token_list, pad_token)
     
-    return input_tensor, label_list, idx_list#, problematic
+    return input_tensor, label_list, idx_list
 
