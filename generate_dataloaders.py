@@ -15,8 +15,26 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split, Dataset, RandomSampler, SequentialSampler
 import pickle
+import random 
+import numpy as np
 
+# Random seed
+seed = 1029
 
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+np.random.seed(seed)  # Numpy module.
+random.seed(seed)  # Python random module.
+torch.manual_seed(seed)
+torch.backends.cudnn.enabled = False 
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+
+if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
+
+def _init_fn(worker_id):
+    np.random.seed(int(seed))
 
 
 class Dictionary(object):
