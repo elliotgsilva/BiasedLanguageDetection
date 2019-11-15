@@ -1,4 +1,6 @@
 #No .DS_Store, ipynb checkpoints
 .DS_Store
 *.p
-.ipynb_checkpoints/
+.ipynb_checkpoints/*
+__pycache*
+data/.DS_Store
