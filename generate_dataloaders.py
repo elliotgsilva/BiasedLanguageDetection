@@ -8,7 +8,7 @@
 
 
 import sys
-import jsonlines
+#import jsonlines
 from tqdm import tqdm
 import os
 import torch
@@ -96,7 +96,7 @@ class TensoredDataset(object):
         self.problematic = []
         
         for sample in list_of_lists_of_tokens:
-            self.input_tensors.append(torch.tensor([sample[:-1]], dtype=torch.long))
+            self.input_tensors.append(torch.tensor([sample], dtype=torch.long))
         for sample in list_of_labels:
             self.label_tensors.append(torch.tensor(sample, dtype=torch.long))
         for sample in list_of_flagged_indexes:
