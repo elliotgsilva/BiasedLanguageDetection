@@ -5,6 +5,7 @@
 __pycache*
 data/.DS_Store
 data/.ipynb_checkpoints/*
+data/glove.twitter.27B.200d.txt
 *~
 # Compiled source #
 ###################
