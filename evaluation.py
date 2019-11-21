@@ -50,29 +50,37 @@ def decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,
     df_pred = pd.DataFrame({'review':reviews,'index':index_list,'flagged_word':flagged_words,\
                             'assignment':cluster_assignment_list,'original':original_label})
     
-    pred_1 = df_pred[df_pred.assignment==1]
-    pred_0 = df_pred[df_pred.assignment==0]
+    TP_cluster = df_pred[df_pred.assignment==1]
+    FP_cluster = df_pred[df_pred.assignment==0]
     
-    pred_1_manual_TP = len(pred_1[pred_1.original == 1]) / pred_1.shape[0]
-    pred_0_manual_TP = len(pred_0[pred_0.original == 1]) / pred_0.shape[0]
+#     pred_1 = df_pred[df_pred.assignment==1]
+#     pred_0 = df_pred[df_pred.assignment==0]
     
-    if pred_1_manual_TP >= pred_0_manual_TP:
-        TP_cluster = pred_1
-        FP_cluster = pred_0
-    else:
-        TP_cluster = pred_0
-        FP_cluster = pred_1
-        TP_cluster.assignment =0
-        FP_cluster.assignment = 1
+#     pred_1_manual_TP = len(pred_1[pred_1.original == 1]) / pred_1.shape[0]
+#     pred_0_manual_TP = len(pred_0[pred_0.original == 1]) / pred_0.shape[0]
+    
+#     if pred_1_manual_TP >= pred_0_manual_TP:
+#         TP_cluster = pred_1
+#         FP_cluster = pred_0
+#     else:
+#         TP_cluster = pred_0
+#         FP_cluster = pred_1
+#         TP_cluster.assignment =0
+#         FP_cluster.assignment = 1
 
     return TP_cluster, FP_cluster
 
 
 def performance_analysis(TP_cluster,FP_cluster):
-    TP_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
-    FP_rate = len(TP_cluster[TP_cluster.original==0]) / TP_cluster.shape[0]
-    FN_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
-    TN_rate = len(TP_cluster[TP_cluster.original==0]) / TP_cluster.shape[0]
+    
+    if TP_cluster.shape[0] != 0:
+        TP_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
+        FP_rate = len(TP_cluster[TP_cluster.original==0]) / TP_cluster.shape[0]
+        FN_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
+        TN_rate = len(TP_cluster[TP_cluster.original==0]) / TP_cluster.shape[0]
+    else:
+        print("Zero rows in TP_cluster!")
+        return
     
     accuracy = (TP_rate + TN_rate) / (TP_rate + FP_rate + FN_rate + TN_rate)
     precision = TP_rate / (TP_rate + FP_rate)
