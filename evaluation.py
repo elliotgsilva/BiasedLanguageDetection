@@ -7,16 +7,16 @@ import random
 from generate_dataloaders import *
 
 
-def load_model_info(model_folder,model_type):
-    path = os.getcwd()
-    model_dir = path + '/models/' + model_folder
+# def load_model_info(model_folder,model_type):
+#     path = os.getcwd()
+#     model_dir = path + '/models/' + model_folder
 
-    opts = torch.load(model_dir+'opts')
-    model = model_type(opts['vocab_size'], opts['emb_dim'])
-    model.load_state_dict(torch.load(model_dir+'model_dict.pt',map_location=lambda storage, loc: storage))
-    centroids = torch.load(model_dir+'centroids',map_location=lambda storage, loc: storage)
+#     opts = torch.load(model_dir+'opts')
+#     model = model_type(opts['vocab_size'], opts['emb_dim'])
+#     model.load_state_dict(torch.load(model_dir+'model_dict.pt',map_location=lambda storage, loc: storage))
+#     centroids = torch.load(model_dir+'centroids',map_location=lambda storage, loc: storage)
     
-    return model, opts, centroids
+#     return model, opts, centroids
 
 def get_predictions(model, centroids, val_loader,criterion,current_device):
     model.eval()
