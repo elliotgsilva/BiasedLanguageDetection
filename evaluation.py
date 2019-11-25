@@ -73,11 +73,11 @@ def decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,
 
 def performance_analysis(TP_cluster,FP_cluster):
     
-    if TP_cluster.shape[0] != 0:
+    if (TP_cluster.shape[0] != 0) and (FP_cluster.shape[0] != 0):
         TP_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
         FP_rate = len(TP_cluster[TP_cluster.original==0]) / TP_cluster.shape[0]
-        FN_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
-        TN_rate = len(TP_cluster[TP_cluster.original==0]) / TP_cluster.shape[0]
+        FN_rate = len(FP_cluster[FP_cluster.original==1]) / FP_cluster.shape[0]
+        TN_rate = len(FP_cluster[FP_cluster.original==0]) / FP_cluster.shape[0]
     else:
         print("Zero rows in TP_cluster!")
         return
