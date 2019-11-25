@@ -41,6 +41,29 @@ def get_predictions(model, centroids, val_loader,criterion,current_device):
             
     return token_list, flagged_index_list, cluster_assignment_list, original_label
 
+def get_supervised_predictions(model, val_loader, criterion, current_device):
+    model.eval()
+    token_list = []
+    cluster_assignment_list = []
+    flagged_index_list = []
+    original_label = []
+    for i, (tokens, labels, flagged_indices) in enumerate(val_loader):
+            tokens = tokens.to(current_device)
+            labels = labels.to(current_device)
+            flagged_indices = flagged_indices.to(current_device)
+            
+            # forward pass and compute loss
+            class_probabilities = model(tokens,flagged_indices)
+            cluster_assignments = class_probabilities.max(1,keepdim=True)[1].view(-1)
+            
+            # store in list
+            token_list+=tokens.tolist()
+            flagged_index_list+=flagged_indices.tolist()
+            cluster_assignment_list+=cluster_assignments.tolist()
+            original_label+=labels.tolist()
+            
+    return token_list, flagged_index_list, cluster_assignment_list, original_label
+
 
 def decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,original_label):
     decoded_tokens = [' '.join(dictionary.decode_idx_seq(sent)) for sent in token_list]
@@ -101,15 +124,19 @@ def performance_analysis(TP_cluster,FP_cluster):
 
 def main(model, centroids, val_loader, criterion, data_dir, current_device):
 	#print(criterion)
-	token_list, index_list, cluster_assignment_list, original_label = get_predictions(model, centroids, val_loader, criterion, current_device)
-	print(f"Total examples in val loader: {len(index_list)}")
-	print(f"Assigned to cluster 1: {sum(cluster_assignment_list)}")
-	dictionary = pkl.load(open(data_dir+'dictionary.p','rb'))
-	pd.set_option('max_colwidth',0)
-	TP_cluster, FP_cluster = decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,original_label)
-	performance_analysis(TP_cluster,FP_cluster)
+    if centroids == None:
+        token_list, index_list, cluster_assignment_list, original_label = get_supervised_predictions(model, val_loader, criterion, current_device)
+	   
+    else:
+        token_list, index_list, cluster_assignment_list, original_label = get_predictions(model, centroids, val_loader, criterion, current_device)
+    print(f"Total examples in val loader: {len(index_list)}")
+    print(f"Assigned to cluster 1: {sum(cluster_assignment_list)}")
+    dictionary = pkl.load(open(data_dir+'dictionary.p','rb'))
+    pd.set_option('max_colwidth',0)
+    TP_cluster, FP_cluster = decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,original_label)
+    performance_analysis(TP_cluster,FP_cluster)
 
-	return TP_cluster, FP_cluster
+    return TP_cluster, FP_cluster
 
 
 
