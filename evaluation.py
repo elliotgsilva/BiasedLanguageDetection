@@ -124,7 +124,7 @@ def performance_analysis(TP_cluster,FP_cluster):
 
 def main(model, centroids, val_loader, criterion, data_dir, current_device):
 	#print(criterion)
-    if centroids == None:
+    if len(centroids) == 0:
         token_list, index_list, cluster_assignment_list, original_label = get_supervised_predictions(model, val_loader, criterion, current_device)
 	   
     else:
