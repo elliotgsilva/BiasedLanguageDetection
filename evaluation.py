@@ -5,6 +5,12 @@ import os
 import pandas as pd
 import random
 from generate_dataloaders import *
+import transformers
+
+
+from transformers import (
+    BertTokenizer
+)
 
 
 # def load_model_info(model_folder,model_type):
@@ -138,6 +144,100 @@ def main(model, centroids, val_loader, criterion, data_dir, current_device):
 
     return TP_cluster, FP_cluster
 
+def bert(model, centroids, val_loader, criterion, data_dir, current_device):
+    #print(criterion)
+    if len(centroids) == 0:
+        token_list, cluster_assignment_list, original_label = get_supervised_bert_predictions(model, val_loader, criterion, current_device)
+       
+    else:
+        token_list, cluster_assignment_list, original_label = get_bert_predictions(model, centroids, val_loader, criterion, current_device)
+    print(f"Total examples in val loader: {len(token_list)}")
+    print(f"Assigned to cluster 1: {sum(cluster_assignment_list)}")
+    dictionary = BertTokenizer.from_pretrained('bert-base-cased')
+    pd.set_option('max_colwidth',0)
+    TP_cluster, FP_cluster = decode_bert_predictions(token_list,cluster_assignment_list,dictionary,original_label)
+    performance_analysis(TP_cluster,FP_cluster)
+
+    return TP_cluster, FP_cluster
+
+def get_bert_predictions(model, centroids, val_loader,criterion,current_device):
+    model.eval()
+    token_list = []
+    cluster_assignment_list = []
+    flagged_index_list = []
+    original_label = []
+    for i, (input_ids, attention_mask, token_type_ids, labels) in enumerate(val_loader):
+            model.eval()
+            input_ids = input_ids.to(current_device)
+            attention_mask = attention_mask.to(current_device)
+            token_type_ids = token_type_ids.to(current_device)
+            labels = labels.to(current_device)
+            
+            # forward pass and compute loss
+            sentence_embed,attn = model(input_ids, attention_mask, token_type_ids)
+            cluster_loss, cluster_assignments = criterion(sentence_embed, centroids)
+            
+            # store in list
+            token_list+=input_ids.tolist()
+            # flagged_index_list+=flagged_indices.tolist()
+            cluster_assignment_list+=cluster_assignments.tolist()
+            original_label+=labels.tolist()
+            
+    return token_list, cluster_assignment_list, original_label
+
+def get_supervised_bert_predictions(model, val_loader, criterion, current_device):
+    model.eval()
+    token_list = []
+    cluster_assignment_list = []
+    flagged_index_list = []
+    original_label = []
+    for i, (input_ids, attention_mask, token_type_ids, labels) in enumerate(val_loader):
+            model.eval()
+            input_ids = input_ids.to(current_device)
+            attention_mask = attention_mask.to(current_device)
+            token_type_ids = token_type_ids.to(current_device)
+            labels = labels.to(current_device)
+            
+            # forward pass and compute loss
+            logits,attn = model(input_ids, attention_mask, token_type_ids)
+
+            cluster_assignments = logits.max(1,keepdim=True)[1].view(-1)
+            
+            # store in list
+            token_list+=input_ids.tolist()
+            # flagged_index_list+=flagged_indices.tolist()
+            cluster_assignment_list+=cluster_assignments.tolist()
+            original_label+=labels.tolist()
+            
+    return token_list, cluster_assignment_list, original_label
+
+def decode_bert_predictions(token_list,cluster_assignment_list,dictionary,original_label):
+    decoded_tokens = [' '.join([dictionary._convert_id_to_token(word) for word in sent]) for sent in token_list]
+    reviews = [decoded for decoded in decoded_tokens]
+    # flagged_words = [r.split()[i] for (r,i) in zip(reviews,index_list)]
+    reviews = [review.split('[PAD]')[0] for review in reviews]
+    df_pred = pd.DataFrame({'review':reviews,\
+                            'assignment':cluster_assignment_list,'original':original_label})
+    
+    TP_cluster = df_pred[df_pred.assignment==1]
+    FP_cluster = df_pred[df_pred.assignment==0]
+    
+    pred_1 = df_pred[df_pred.assignment==1]
+    pred_0 = df_pred[df_pred.assignment==0]
+    
+    pred_1_manual_TP = len(pred_1[pred_1.original == 1]) / pred_1.shape[0]
+    pred_0_manual_TP = len(pred_0[pred_0.original == 1]) / pred_0.shape[0]
+    
+    if pred_1_manual_TP >= pred_0_manual_TP:
+        TP_cluster = pred_1
+        FP_cluster = pred_0
+    else:
+        TP_cluster = pred_0
+        FP_cluster = pred_1
+        TP_cluster.assignment =0
+        FP_cluster.assignment = 1
+
+    return TP_cluster, FP_cluster
 
 
 
