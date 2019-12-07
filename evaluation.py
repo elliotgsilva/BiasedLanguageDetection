@@ -89,7 +89,7 @@ def decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,
     return TP_cluster, FP_cluster
 
 
-def performance_analysis(TP_cluster,FP_cluster):
+def performance_analysis(TP_cluster,FP_cluster,verbose=True):
     
     if (TP_cluster.shape[0] != 0) and (FP_cluster.shape[0] != 0):
         TP_rate = len(TP_cluster[TP_cluster.original==1]) / TP_cluster.shape[0]
@@ -105,16 +105,17 @@ def performance_analysis(TP_cluster,FP_cluster):
     recall = TP_rate / (TP_rate + FN_rate)
     f1_score = (2 * precision * recall) / (precision + recall)
     
-    print("TP_rate:",TP_rate)
-    print("FP_rate:",FP_rate)
-    print("FN_rate:",FN_rate)
-    print("TN_rate:",TN_rate)
-    print("\n")
-    
-    print("Accuracy:",accuracy)
-    print("Precision:",precision)
-    print("Recall:",recall)
-    print("F1 score:",f1_score)
+    if verbose:
+        print("TP_rate:",TP_rate)
+        print("FP_rate:",FP_rate)
+        print("FN_rate:",FN_rate)
+        print("TN_rate:",TN_rate)
+        print("\n")
+        
+        print("Accuracy:",accuracy)
+        print("Precision:",precision)
+        print("Recall:",recall)
+        print("F1 score:",f1_score)
 
     return {"TP_rate":TP_rate,
             "FP_rate":FP_rate,
@@ -126,7 +127,7 @@ def performance_analysis(TP_cluster,FP_cluster):
             "F1 score":f1_score}
 
 #main fcn for printing results of non-bert models
-def main(model, centroids, val_loader, criterion, data_dir, current_device):
+def main(model, centroids, val_loader, criterion, data_dir, current_device, verbose=True):
 	#print(criterion)
     if len(centroids) == 0:
         token_list, index_list, cluster_assignment_list, original_label = get_supervised_predictions(model, val_loader, criterion, current_device)
@@ -138,7 +139,7 @@ def main(model, centroids, val_loader, criterion, data_dir, current_device):
     dictionary = pkl.load(open(data_dir+'dictionary.p','rb'))
     pd.set_option('max_colwidth',0)
     TP_cluster, FP_cluster = decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,original_label)
-    results = performance_analysis(TP_cluster,FP_cluster)
+    results = performance_analysis(TP_cluster,FP_cluster,verbose)
     results["val_total"] = len(index_list)
     results["assigned_1"] = sum(cluster_assignment_list)
 
