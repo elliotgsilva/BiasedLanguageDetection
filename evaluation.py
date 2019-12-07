@@ -142,9 +142,6 @@ def main(model, centroids, val_loader, criterion, data_dir, current_device):
     results["val_total"] = len(index_list)
     results["assigned_1"] = sum(cluster_assignment_list)
 
-    with open(data_dir + "results.p","wb") as f:
-        pickle.dump(results, f)
-
     return TP_cluster, FP_cluster, results
 
 #main fcn for printing results of bert model
@@ -163,9 +160,6 @@ def bert(model, centroids, val_loader, criterion, data_dir, current_device):
     results = performance_analysis(TP_cluster,FP_cluster)
     results["val_total"] = len(index_list)
     results["assigned_1"] = sum(cluster_assignment_list)
-
-    with open(data_dir + "results.p","wb") as f:
-        pickle.dump(results, f)
 
     return TP_cluster, FP_cluster, results
 
