@@ -134,8 +134,9 @@ def main(model, centroids, val_loader, criterion, data_dir, current_device, verb
 	   
     else:
         token_list, index_list, cluster_assignment_list, original_label = get_predictions(model, centroids, val_loader, criterion, current_device)
-    print(f"Total examples in val loader: {len(index_list)}")
-    print(f"Assigned to cluster 1: {sum(cluster_assignment_list)}")
+    if verbose:
+        print(f"Total examples in val loader: {len(index_list)}")
+        print(f"Assigned to cluster 1: {sum(cluster_assignment_list)}")
     dictionary = pkl.load(open(data_dir+'dictionary.p','rb'))
     pd.set_option('max_colwidth',0)
     TP_cluster, FP_cluster = decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,original_label)
