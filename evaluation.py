@@ -13,17 +13,6 @@ from transformers import (
 )
 
 
-# def load_model_info(model_folder,model_type):
-#     path = os.getcwd()
-#     model_dir = path + '/models/' + model_folder
-
-#     opts = torch.load(model_dir+'opts')
-#     model = model_type(opts['vocab_size'], opts['emb_dim'])
-#     model.load_state_dict(torch.load(model_dir+'model_dict.pt',map_location=lambda storage, loc: storage))
-#     centroids = torch.load(model_dir+'centroids',map_location=lambda storage, loc: storage)
-    
-#     return model, opts, centroids
-
 def get_predictions(model, centroids, val_loader,criterion,current_device):
     model.eval()
     token_list = []
@@ -127,7 +116,16 @@ def performance_analysis(TP_cluster,FP_cluster):
     print("Recall:",recall)
     print("F1 score:",f1_score)
 
+    return {"TP_rate":TP_rate,
+            "FP_rate":FP_rate,
+            "FN_rate":FN_rate,
+            "TN_rate":TN_rate,
+            "Accuracy":accuracy,
+            "Precision":precision,
+            "Recall":recall,
+            "F1 score":f1_score}
 
+#main fcn for printing results of non-bert models
 def main(model, centroids, val_loader, criterion, data_dir, current_device):
 	#print(criterion)
     if len(centroids) == 0:
@@ -140,10 +138,16 @@ def main(model, centroids, val_loader, criterion, data_dir, current_device):
     dictionary = pkl.load(open(data_dir+'dictionary.p','rb'))
     pd.set_option('max_colwidth',0)
     TP_cluster, FP_cluster = decode_predictions(token_list,index_list,cluster_assignment_list,dictionary,original_label)
-    performance_analysis(TP_cluster,FP_cluster)
+    results = performance_analysis(TP_cluster,FP_cluster)
+    results["val_total"] = len(index_list)
+    results["assigned_1"] = sum(cluster_assignment_list)
 
-    return TP_cluster, FP_cluster
+    with open(data_dir + "results.p","wb") as f:
+        pickle.dump(results, f)
 
+    return TP_cluster, FP_cluster, results
+
+#main fcn for printing results of bert model
 def bert(model, centroids, val_loader, criterion, data_dir, current_device):
     #print(criterion)
     if len(centroids) == 0:
@@ -156,9 +160,14 @@ def bert(model, centroids, val_loader, criterion, data_dir, current_device):
     dictionary = BertTokenizer.from_pretrained('bert-base-cased')
     pd.set_option('max_colwidth',0)
     TP_cluster, FP_cluster = decode_bert_predictions(token_list,cluster_assignment_list,dictionary,original_label)
-    performance_analysis(TP_cluster,FP_cluster)
+    results = performance_analysis(TP_cluster,FP_cluster)
+    results["val_total"] = len(index_list)
+    results["assigned_1"] = sum(cluster_assignment_list)
 
-    return TP_cluster, FP_cluster
+    with open(data_dir + "results.p","wb") as f:
+        pickle.dump(results, f)
+
+    return TP_cluster, FP_cluster, results
 
 def get_bert_predictions(model, centroids, val_loader,criterion,current_device):
     model.eval()
