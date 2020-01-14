@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ### Make a dictionary, dataloader
+# Module for creating dictionary and dataloaders
 
 #Classes: Dictionary, TensoredDataset
 #Fcns: indexize_dataset, pad_list_of_tensors, pad_collate_fn
 
 
 import sys
-#import jsonlines
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 import os
 import torch
 import torch.nn as nn
@@ -18,25 +17,8 @@ import pickle
 import random 
 import numpy as np
 
-# Random seed
-seed = 1029
 
-torch.manual_seed(seed)
-torch.cuda.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
-np.random.seed(seed)  # Numpy module.
-random.seed(seed)  # Python random module.
-torch.manual_seed(seed)
-torch.backends.cudnn.enabled = False 
-torch.backends.cudnn.benchmark = False
-torch.backends.cudnn.deterministic = True
-
-if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
-
-def _init_fn(worker_id):
-    np.random.seed(int(seed))
-
-
+# Dictionary object of all vocab in dataset to indices
 class Dictionary(object):
     def __init__(self, datasets, include_valid=False):
         self.tokens = []
@@ -50,8 +32,7 @@ class Dictionary(object):
         for line in tqdm(datasets['review']):
             for w in line:
                 self.add_token(w)
-
-                            
+      
     def add_token(self, w):
         if w not in self.tokens:
             self.tokens.append(w)
@@ -77,7 +58,7 @@ class Dictionary(object):
         return len(self.tokens)
 
 
-
+#Encode all reviews in index form using above dictionary
 def indexize_dataset(datasets, dictionary):
     indexized_datasets = []
     for l in tqdm(datasets["review"]):
@@ -87,7 +68,7 @@ def indexize_dataset(datasets, dictionary):
     return indexized_datasets
 
 
-
+#TensoredDataset object is needed to create Dataloaders for model training, uses the indexized datasets
 class TensoredDataset(object):
     def __init__(self, list_of_lists_of_tokens, list_of_labels,list_of_flagged_indexes):
         self.input_tensors = []
@@ -136,3 +117,20 @@ def pad_collate_fn(batch):
     
     return input_tensor, label_list, idx_list
 
+# Random seed
+seed = 1029
+
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+np.random.seed(seed)  # Numpy module.
+random.seed(seed)  # Python random module.
+torch.manual_seed(seed)
+torch.backends.cudnn.enabled = False 
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+
+if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed)
+
+def _init_fn(worker_id):
+    np.random.seed(int(seed))
