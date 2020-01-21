@@ -17,39 +17,32 @@ Our modelling efforts utilized a semi-supervised learning setting to make use of
 
 ## UMAP Visualization
 
-Each embedding from each model could be saved from the code at the end of the model-training notebook.  For making plots, use ‘plot_embedding.ipynb’ in UMAP folder. Please note that this notebook will save plots for each model once so every time you have to comment/uncomment model_name and model_folder.
-
+Each embedding from each model is saved from the code at the end of the model-training notebook.  For making plots using these saved models, use ‘plot_embedding.ipynb’ in UMAP folder. Please note that this notebook will save plots for each model once so every time you have to comment/uncomment model_name and model_folder.
 
 ## Repository Organization:
 
-1) data folder
-contains scripts for initial processing of raw datasets: filtering reviews for only those containing flagged words, tokenizing, and converting to dataframe
-master_df_labeled.xlsx = contains labelled (& unlabelled?)
-**should contain dataloader folder too**
+1) `data` folder
+- Contains scripts for initial processing of raw datasets: filtering reviews for only those containing flagged words, tokenizing, and converting to dataframe
+- `master_df_labeled.xlsx` = contains labelled (& unlabelled) reviews
+- dataloaders
 
-1) data_prep folder -- notebooks to process data to get dataloaders for models
-`get_all_reviews` and `filter_reviews` -- data processing notebooks specific to FairFrame’s proprietary dataset. The output is a DataFrame with tokenized review sentences, the flagged word, and the index of the flagged word
-`label_data_samples` -- updates a master data file with manual annotations of whether or not word was flagged in problematic context. This also contains code for creating data batches for manual annotation.
-`generate_dataloaders`, `generate_dataloaders.py`, and `bert_dataloaders` -- creates dataloaders required for model training
+1) `data_prep` folder -- notebooks to process data and generate dataloaders for models
+- `get_all_reviews` and `filter_reviews` -- data processing notebooks specific to FairFrame’s proprietary dataset. The output is a DataFrame with tokenized review sentences, the flagged word, and the index of the flagged word
+- `label_data_samples` -- updates a master data file with manual annotations of whether or not word was flagged in problematic context. This also contains code for creating data batches for manual annotation.
+- `generate_dataloaders`, `generate_dataloaders.py`, and `bert_dataloaders` -- creates dataloaders required for model training
 
-2) model_training folder
-contains scripts for baseline models, as well as LSTM and BERT
-‘unsupervised_baseline_randomized_embeddings’ -- trains unsupervised baseline model, with randomly-initialized embeddings
-unsupervised_‘baseline_frozen_glove’ -- trains unsupervised baseline model, initialized with pretrained GloVe word embeddings
-‘semisupervised_baseline_randomized_embeddings’ -- trains semi-supervised baseline model, with randomly-initialized embeddings
-‘semisupervised_baseline_frozen_glove’ -- trains semi-supervised baseline model, initialized with pretrained GloVe word embeddings
-‘lstm_model’ --
-‘bert_model’
+2) `model_training` folder -- contains scripts for baseline models, as well as LSTM and BERT
+- `unsupervised_baseline_randomized_embeddings` -- trains unsupervised baseline model, with randomly-initialized embeddings
+- `unsupervised_baseline_glove_embeddings` -- trains unsupervised baseline model, initialized with pretrained GloVe word embeddings
+- `semisupervised_baseline_randomized_embeddings’ -- trains semi-supervised baseline model, with randomly-initialized embeddings
+- `semisupervised_baseline_glove_embeddings` -- trains semi-supervised baseline model, initialized with pretrained GloVe word embeddings
+- `lstm_model` - trains an LSTM model to generate contextualised embeddings for the reviews, initialized with pretrained GloVe word embeddings
+- `bert_model` - finetunes the pretrained BERT base and BERT large models for our task
 
-3) model_output folder
-contains subfolders for each model architecture
-within each subfolder are additional subfolders, saving the output for each hyperparameter settings trained
+3) `model_output` folder -- contains subfolders for each model architecture. Within each subfolder are additional subfolders, saving the output for each hyperparameter setting trained.
 
-4) evaluation folder
-contains scripts and notebooks for evaluating our model
-many models will import the evaluation.py script, which enables calculations of metrics such as accuracy, precision, recall, and F1-score over the validation set of labelled reviews
+4) `evaluation` folder -- contains scripts and notebooks for evaluating our model. Many models will import the `evaluation.py` script, which enables calculations of metrics such as accuracy, precision, recall, and F1-score over the validation set of labelled reviews
 
-5) umap folder
-contains everything related to UMAP visualizations of each model
-we only use best-performing hyperparameter
-**looks like we only have .png files here, not the code? Can we include any code for this?
+5) `umap` folder -- visualization code and saved images
+- Contains subfolders for each model. Within each subfolder are pickle files containing trained embeddings, the labels and UMAP visualizations of the embeddings. Note that we only use best-performing hyperparameter configuration for each model type.
+- `plot_embedding.ipynb` -- code to generate plots. Please note that this notebook will save plots for each model once so every time you have to comment/uncomment model_name and model_folder.
