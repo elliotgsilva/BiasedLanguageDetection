@@ -7,9 +7,9 @@ This repository contains code serving as a proof-of-concept for future implement
 ## Dataset 
 
 The dataset contains proprietary information gathered by the company, and thus are hidden. The dataset we built our model with contains the following:
-A list of flagged words which may connote gender bias
-A set of 110K reviews, scraped from various websites wherein companies may provide feedback for freelancing employees
-Of this, the NYU & FairFrame teams worked together to annotate a subset of 5K reviews, based on whether the flagged word was being used in a problematic manner
+- A list of flagged words which may connote gender bias
+- A set of 110K reviews, scraped from various websites wherein companies may provide feedback for freelancing employees
+- Of the above 110K reviews, the NYU & FairFrame teams worked together to annotate a subset of 5K reviews, based on whether the flagged word was being used in a problematic manner
 
 ## Modeling
 
