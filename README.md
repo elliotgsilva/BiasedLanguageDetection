@@ -43,5 +43,5 @@ Each embedding from each model is saved from the code at the end of the model-tr
 5) `evaluation` folder -- contains scripts and notebooks for evaluating our model. Many models will import the `evaluation.py` script, which enables calculations of metrics such as accuracy, precision, recall, and F1-score over the validation set of labelled reviews
 
 6) `umap` folder -- visualization code and saved images
-- Contains subfolders for each model. Within each subfolder are pickle files containing trained embeddings, the labels and UMAP visualizations of the embeddings. Note that we only use best-performing hyperparameter configuration for each model type.
+- One subfolder per model. Within each subfolder are pickle files containing trained embeddings, the labels and UMAP visualizations of the embeddings. Note that we only use best-performing hyperparameter configuration for each model type.
 - `plot_embedding.ipynb` -- code to generate plots. Please note that this notebook will save plots for each model once so every time you have to comment/uncomment model_name and model_folder.
